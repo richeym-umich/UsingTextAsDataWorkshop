@@ -37,9 +37,12 @@ barplot(years$number_files, names=years$year,
 
 # to read xml files, R has the "XML" package
 # you can install it with install.packages("XML)
-library("XML")
+#library("XML")
+library("xml2")
 library("methods")
 
+#first, we create an empty dataframe 
+# to collect information about each document
 documentDF <- data.frame(filename = as.character(), 
                          publisher = as.character(),
                          pubPlace = as.character(),
@@ -55,46 +58,38 @@ parseUNDocumentFromXML <- function(file_path) {
   
   filename <- setNames(data.frame(file_path, stringsAsFactors = FALSE), c("filename"))
 
-  this_xml_file <- xmlParse(file_path)
-
-  publisher <- setNames(xmlToDataFrame(getNodeSet(this_xml_file, 
-                                                "//TEI.2/teiHeader/fileDesc/publicationStmt/publisher"), 
-                                       stringsAsFactors = FALSE), 
-                      c("publisher"))
+  this_xml_file <- read_xml(file_path)
   
-  pubPlace <- setNames(xmlToDataFrame(getNodeSet(this_xml_file, 
-                                               "//TEI.2/teiHeader/fileDesc/publicationStmt/pubPlace"), 
-                                      stringsAsFactors = FALSE),
+  #we need one cleaning step here by adding white spaces before "</s>"
+  # otherwise, the text in the body is collapsed such that words get 
+  # baked together
+  this_xml_file <- read_xml(gsub("</s>", " </s>", this_xml_file))
+
+  publisher <- setNames(xml_text(xml_find_all(this_xml_file, ".//publisher")), 
+                      c("publisher"))
+
+  pubPlace <- setNames(xml_text(xml_find_all(this_xml_file, ".//pubPlace")),
                      c("pubPlace"))
   
-  date <- setNames(xmlToDataFrame(getNodeSet(this_xml_file, "//TEI.2/teiHeader/fileDesc/publicationStmt/date"), 
-                                  stringsAsFactors = FALSE),
+  date <- setNames(xml_text(xml_find_all(this_xml_file, ".//date")),
                  c("date"))
   
-  idno <- xmlToDataFrame(getNodeSet(this_xml_file, "//TEI.2/teiHeader/fileDesc/publicationStmt/idno"), 
-                         stringsAsFactors = FALSE)
-  idno <- setNames(data.frame(t(idno), row.names = NULL, 
-                              stringsAsFactors = FALSE), c("symbol", "jobno"))
+  symbol <- setNames(xml_text(xml_find_all(this_xml_file, ".//idno"))[1],
+                     c("symbol"))
+  jobno <- setNames(xml_text(xml_find_all(this_xml_file, ".//idno"))[2],
+                    c("jobno"))
   
-  body <- xmlToDataFrame(getNodeSet(this_xml_file, "//TEI.2/text/body"), 
-                         stringsAsFactors = FALSE)
-  body$text <- apply(body, 1, function(x) paste(x, collapse = " "))
-  
-  new_df_row <- cbind(filename, publisher, pubPlace, date, idno, body["text"])
+  body <- setNames(xml_text(xml_find_all(this_xml_file, ".//body")), c("body"))
+
+  new_df_row <- cbind(filename, publisher, pubPlace, date, symbol, jobno, body)
   
   documentDF <- rbind(documentDF, new_df_row)
   return(documentDF)
 }
 
-documentDF <- parseUNDocumentFromXML(xml_filepaths[1])
-print(documentDF)
-
-#FIXME: iterating over multiple rows doesn't yet work
-# breaks in second document
+#let's iterate over the first 10 documents
 for (i in 1:10) {
-  print(i)
   documentDF <- parseUNDocumentFromXML(xml_filepaths[i])
 }
 
-print(documentDF)
-
+str(documentDF)
