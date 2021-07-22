@@ -35,9 +35,9 @@ stopifnot(sum(years$number_files)==length(xml_filepaths))
 barplot(years$number_files, names=years$year,
         las=1, main="UN Parallel Corpus: yearly xml files over time")
 
-# to read xml files, R has the "XML" package
-# you can install it with install.packages("XML)
-#library("XML")
+# to read xml files, R has the "xml2" package
+# (the "XML" package is no longer being maintained)
+# you can install it with install.packages("xml2")
 library("xml2")
 library("methods")
 
@@ -65,21 +65,28 @@ parseUNDocumentFromXML <- function(file_path) {
   # baked together
   this_xml_file <- read_xml(gsub("</s>", " </s>", this_xml_file))
 
-  publisher <- setNames(xml_text(xml_find_all(this_xml_file, ".//publisher")), 
+  publisher <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//publisher")),
+                                   stringsAsFactors = FALSE), 
                       c("publisher"))
 
-  pubPlace <- setNames(xml_text(xml_find_all(this_xml_file, ".//pubPlace")),
+  pubPlace <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//pubPlace")),
+                                  stringsAsFactors = FALSE),
                      c("pubPlace"))
   
-  date <- setNames(xml_text(xml_find_all(this_xml_file, ".//date")),
+  date <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//date")),
+                              stringsAsFactors = FALSE),
                  c("date"))
   
-  symbol <- setNames(xml_text(xml_find_all(this_xml_file, ".//idno"))[1],
+  symbol <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//idno"))[1],
+                                stringsAsFactors = FALSE),
                      c("symbol"))
-  jobno <- setNames(xml_text(xml_find_all(this_xml_file, ".//idno"))[2],
+  jobno <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//idno"))[2],
+                               stringsAsFactors = FALSE),
                     c("jobno"))
   
-  body <- setNames(xml_text(xml_find_all(this_xml_file, ".//body")), c("body"))
+  body <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//body")),
+                              stringsAsFactors = FALSE), 
+                   c("body"))
 
   new_df_row <- cbind(filename, publisher, pubPlace, date, symbol, jobno, body)
   
@@ -92,4 +99,6 @@ for (i in 1:10) {
   documentDF <- parseUNDocumentFromXML(xml_filepaths[i])
 }
 
+#TODO: parse all docs or just a subset
 str(documentDF)
+
