@@ -32,9 +32,10 @@ for (year in years$year) {
 stopifnot(sum(years$number_files)==length(xml_filepaths))
 
 #we can visualize the number of documents over time
+pdf(file="~/git/UsingTextAsDataWorkshop/R-code/import/output/bg-UNCorpus-file-distribution-over-time.pdf", height = 7, width = 12)
 barplot(years$number_files, names=years$year,
         las=1, main="UN Parallel Corpus: yearly xml files over time")
-
+dev.off()
 # to read xml files, R has the "xml2" package
 # (the "XML" package is no longer being maintained)
 # you can install it with install.packages("xml2")
