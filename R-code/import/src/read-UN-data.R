@@ -42,20 +42,9 @@ dev.off()
 library("xml2")
 library("methods")
 
-#first, we create an empty dataframe 
-# to collect information about each document
-documentDF <- data.frame(filename = as.character(), 
-                         publisher = as.character(),
-                         pubPlace = as.character(),
-                         date = as.character(),
-                         symbol = as.character(),
-                         jobno = as.character(),
-                         text = as.character(), 
-                         stringsAsFactors = FALSE)
-
 #we create a function that parses each xml file into one data row,
 # we collect some metadata for each document, and the document's text
-parseUNDocumentFromXML <- function(file_path) {
+parseUNDocumentFromXML <- function(iter, file_path, row_container) {
   
   filename <- setNames(data.frame(file_path, stringsAsFactors = FALSE), c("filename"))
 
@@ -66,9 +55,10 @@ parseUNDocumentFromXML <- function(file_path) {
   # baked together
   this_xml_file <- read_xml(gsub("</s>", " </s>", this_xml_file))
 
-  publisher <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//publisher")),
-                                   stringsAsFactors = FALSE), 
-                      c("publisher"))
+  #the publisher seems to be the same for every document
+  # publisher <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//publisher")),
+  #                                  stringsAsFactors = FALSE), 
+  #                     c("publisher"))
 
   pubPlace <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//pubPlace")),
                                   stringsAsFactors = FALSE),
@@ -89,17 +79,43 @@ parseUNDocumentFromXML <- function(file_path) {
                               stringsAsFactors = FALSE), 
                    c("body"))
 
-  new_df_row <- cbind(filename, publisher, pubPlace, date, symbol, jobno, body)
+  new_df_row <- cbind(filename, pubPlace, date, symbol, jobno, body)
   
-  documentDF <- rbind(documentDF, new_df_row)
-  return(documentDF)
+  row_container[[iter]] <- new_df_row
+  return(row_container)
 }
 
-#let's iterate over the first 10 documents
-for (i in 1:10) {
-  documentDF <- parseUNDocumentFromXML(xml_filepaths[i])
+#we create an empty list that we will fill with new rows, 
+# one for each parsed UN document
+row_container <- list()
+
+#let's parse all documents for 2014,
+# warning, this takes a while as we are parsing 8K+ xml files
+for (i in grep("^2014", xml_filepaths)) {
+  row_container <- parseUNDocumentFromXML(i, xml_filepaths[i], row_container)
 }
+documentDF2014 <- do.call(rbind, row_container)
+stopifnot(nrow(documentDF2014)==length(grep("^2014", xml_filepaths)))
+row_container <- NULL
 
-#TODO: parse all docs or just a subset
-str(documentDF)
+table(documentDF2014$pubPlace, useNA = "always")
+#we will have some data cleaning to do
+write.table(documentDF2014, 
+          file="~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-2014.csv",
+          row.names = FALSE, sep = '|')
 
+#let's also parse all documents for 2011
+row_container <- list()
+for (i in grep("^2011", xml_filepaths)) {
+  row_container <- parseUNDocumentFromXML(i, xml_filepaths[i], row_container)
+}
+documentDF2011 <- do.call(rbind, row_container)
+stopifnot(nrow(documentDF2011)==length(grep("^2011", xml_filepaths)))
+row_container <- NULL
+
+table(documentDF2011$pubPlace, useNA = "always")
+write.table(documentDF2011, 
+            file="~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-2011.csv",
+            row.names = FALSE, sep = '|')
+
+#end of Rscript.
