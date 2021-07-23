@@ -55,11 +55,6 @@ parseUNDocumentFromXML <- function(iter, file_path, row_container) {
   # baked together
   this_xml_file <- read_xml(gsub("</s>", " </s>", this_xml_file))
 
-  #the publisher seems to be the same for every document
-  # publisher <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//publisher")),
-  #                                  stringsAsFactors = FALSE), 
-  #                     c("publisher"))
-
   pubPlace <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//pubPlace")),
                                   stringsAsFactors = FALSE),
                      c("pubPlace"))
@@ -85,37 +80,33 @@ parseUNDocumentFromXML <- function(iter, file_path, row_container) {
   return(row_container)
 }
 
-#we create an empty list that we will fill with new rows, 
-# one for each parsed UN document
-row_container <- list()
-
-#let's parse all documents for 2014,
-# warning, this takes a while as we are parsing 8K+ xml files
-for (i in grep("^2014", xml_filepaths)) {
-  row_container <- parseUNDocumentFromXML(i, xml_filepaths[i], row_container)
+processSaveYearData <- function(year) {
+  #we create an empty list that we will fill with new rows, 
+  # one for each parsed UN document
+  row_container <- list()
+  
+  year_selection <- paste("^", year, sep = "")
+  
+  # warning, this step takes a while 
+  # as most years contain thousands of xml files
+  for (i in grep(year_selection, xml_filepaths)) {
+    row_container <- parseUNDocumentFromXML(i, xml_filepaths[i], row_container)
+  }
+  documentDF <- do.call(rbind, row_container)
+  stopifnot(nrow(documentDF)==length(grep(year_selection, xml_filepaths)))
+  row_container <- NULL
+  
+  #let's save a csv file for our year selection
+  outputfilename <- paste("~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-",
+                          year, ".csv", sep = "")
+  write.table(documentDF, 
+              file=outputfilename,
+              row.names = FALSE, sep = '|')
+  print(paste("Saved UN", year, "data to", outputfilename))
+  documentDF <- NULL
 }
-documentDF2014 <- do.call(rbind, row_container)
-stopifnot(nrow(documentDF2014)==length(grep("^2014", xml_filepaths)))
-row_container <- NULL
 
-table(documentDF2014$pubPlace, useNA = "always")
-#we will have some data cleaning to do
-write.table(documentDF2014, 
-          file="~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-2014.csv",
-          row.names = FALSE, sep = '|')
-
-#let's also parse all documents for 2011
-row_container <- list()
-for (i in grep("^2011", xml_filepaths)) {
-  row_container <- parseUNDocumentFromXML(i, xml_filepaths[i], row_container)
-}
-documentDF2011 <- do.call(rbind, row_container)
-stopifnot(nrow(documentDF2011)==length(grep("^2011", xml_filepaths)))
-row_container <- NULL
-
-table(documentDF2011$pubPlace, useNA = "always")
-write.table(documentDF2011, 
-            file="~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-2011.csv",
-            row.names = FALSE, sep = '|')
+processSaveYearData("2011")
+processSaveYearData("2014")
 
 #end of Rscript.
