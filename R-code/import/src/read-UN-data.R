@@ -70,43 +70,55 @@ parseUNDocumentFromXML <- function(iter, file_path, row_container) {
                                stringsAsFactors = FALSE),
                     c("jobno"))
   
-  body <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//body")),
+  text <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//body")),
                               stringsAsFactors = FALSE), 
-                   c("body"))
+                   c("text"))
 
-  new_df_row <- cbind(filename, pubPlace, date, symbol, jobno, body)
+  new_df_row <- cbind(filename, pubPlace, date, symbol, jobno, text)
   
   row_container[[iter]] <- new_df_row
   return(row_container)
 }
 
-processSaveYearData <- function(year) {
+processSaveYearData <- function(year, subdir_name = NULL) {
+  #year: specify the year you want
+  #subdir_name: specify a particular subdirectory structure
+  #             to limit the documents to be retrieved
+  #             within a chosen year
+  
   #we create an empty list that we will fill with new rows, 
   # one for each parsed UN document
   row_container <- list()
   
-  year_selection <- paste("^", year, sep = "")
+  if(is.null(subdir_name)) {
+    file_selection <- paste("^", year, sep = "")
+    outputfilename <- paste("~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-",
+                            year, ".Rdata", sep = "")
+  }
   
-  # warning, this step takes a while 
+  if(!is.null(subdir_name)) {
+    file_selection <- paste("^", year, subdir_name, sep = "")
+    subdir_name <- gsub("/", "", subdir_name)
+    outputfilename <- paste("~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-",
+                            year, "-", subdir_name, ".Rdata", sep = "")
+  }
+  
+  # warning, this step can take a while if run for an entire year
   # as most years contain thousands of xml files
-  for (i in grep(year_selection, xml_filepaths)) {
+  for (i in grep(file_selection, xml_filepaths)) {
     row_container <- parseUNDocumentFromXML(i, xml_filepaths[i], row_container)
   }
   documentDF <- do.call(rbind, row_container)
-  stopifnot(nrow(documentDF)==length(grep(year_selection, xml_filepaths)))
+  stopifnot(nrow(documentDF)==length(grep(file_selection, xml_filepaths)))
   row_container <- NULL
   
-  #let's save a csv file for our year selection
-  outputfilename <- paste("~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-",
-                          year, ".csv", sep = "")
-  write.table(documentDF, 
-              file=outputfilename,
-              row.names = FALSE, sep = '|')
-  print(paste("Saved UN", year, "data to", outputfilename))
+  #let's save an Rdata file for our year selection
+  save(documentDF, file=outputfilename)
+  print(paste("Saved", nrow(documentDF), "UN", year, "data rows to", outputfilename))
   documentDF <- NULL
 }
 
-processSaveYearData("2011")
-processSaveYearData("2014")
+#processSaveYearData("2014")
+processSaveYearData("2014", subdir_name = "/npt/conf_2015/pc_iii")
 
 #end of Rscript.
