@@ -54,7 +54,9 @@ parseUNDocumentFromXML <- function(iter, file_path, row_container) {
   # otherwise, the text in the body is collapsed such that words get 
   # baked together
   this_xml_file <- read_xml(gsub("</s>", " </s>", this_xml_file))
-
+  
+  #we now start pulling out pieces of information 
+  # that we will use as values in a new dataframe row
   pubPlace <- setNames(data.frame(xml_text(xml_find_all(this_xml_file, ".//pubPlace")),
                                   stringsAsFactors = FALSE),
                      c("pubPlace"))
@@ -74,16 +76,18 @@ parseUNDocumentFromXML <- function(iter, file_path, row_container) {
                               stringsAsFactors = FALSE), 
                    c("text"))
 
+  #bind all values together in one rown
   new_df_row <- cbind(filename, pubPlace, date, symbol, jobno, text)
   
   row_container[[iter]] <- new_df_row
   return(row_container)
 }
 
+#now we write a function that will process and write the data for a given year
 processSaveYearData <- function(year, subdir_name = NULL) {
   #year: specify the year you want
-  #subdir_name: specify a particular subdirectory structure
-  #             to limit the documents to be retrieved
+  #subdir_name: if needed specify a particular subdirectory name
+  #             to further limit the documents to be retrieved
   #             within a chosen year
   
   #we create an empty list that we will fill with new rows, 
@@ -99,12 +103,12 @@ processSaveYearData <- function(year, subdir_name = NULL) {
   if(!is.null(subdir_name)) {
     file_selection <- paste("^", year, subdir_name, sep = "")
     subdir_name <- gsub("/", "", subdir_name)
-    outputfilename <- paste("~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-",
-                            year, "-", subdir_name, ".Rdata", sep = "")
+    outputfilename <- gsub("_", "-", paste("~/git/UsingTextAsDataWorkshop/R-code/import/output/UNdocuments-",
+                            year, "-", subdir_name, ".Rdata", sep = ""))
   }
   
   # warning, this step can take a while if run for an entire year
-  # as most years contain thousands of xml files
+  # as most years contain thousands of xml files, i.e., if subdir_name=NULL
   for (i in grep(file_selection, xml_filepaths)) {
     row_container <- parseUNDocumentFromXML(i, xml_filepaths[i], row_container)
   }
@@ -118,7 +122,10 @@ processSaveYearData <- function(year, subdir_name = NULL) {
   documentDF <- NULL
 }
 
-#processSaveYearData("2014")
+#processSaveYearData("2014") #this would take a while to run
+
+#for the purposes of this workshop, we are going to work with the files
+# in a subfolder for the year 2014
 processSaveYearData("2014", subdir_name = "/npt/conf_2015/pc_iii")
 
 #end of Rscript.
