@@ -12,6 +12,7 @@ library(tidytext)
 library(tm)
 library(textclean)
 library(textstem)
+library(ggplot2)
 
 setwd("~/git/UsingTextAsDataWorkshop/R-code/")
 #load our data
@@ -46,6 +47,14 @@ write.csv(clean_text_df, file="clean/output/pc-iii-text-clean.csv")
   
 #let's list the ten most common words across the 71 documents
 clean_text_df %>% 
-  count(word, sort=TRUE)
+  count(word, sort=TRUE) %>% 
+  filter(n>1040) %>% 
+  mutate(word = reorder(word, n)) %>% 
+  ggplot(aes(n, word)) +
+  geom_col() +
+  labs(y=NULL, x = "Word count") +
+  theme_bw(base_size = 20) +
+  ggtitle("Ten most common words in UN Documents")
+ggsave("clean/output/bg-10-most-common-words.pdf", height = 8, width = 12)
 
 #end of Rscript.
