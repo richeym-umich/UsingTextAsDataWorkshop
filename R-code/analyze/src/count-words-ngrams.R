@@ -31,4 +31,20 @@ df %>%
 ggsave("analyze/output/bg-10-most-common-words.pdf", height = 8, width = 12)
 dev.off()
 
+#next, let's identify which two words are common to appear together (bigrams),
+# and plot them, too
+df %>% 
+  unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
+  count(bigram, sort = TRUE) %>% 
+  mutate(bigram = reorder(bigram, n)) %>% 
+  filter(n>325) %>% 
+  ggplot(aes(n,bigram)) +
+  geom_col(fill="#2596be") +
+  labs(y=NULL, x = "N(bigrams)") +
+  theme_bw(base_size = 20) +
+  ggtitle("Ten most common bigrams in UN Documents")
+ggsave("analyze/output/bg-10-most-common-bigrams.pdf", height = 8, width = 12)
+dev.off()
+
+  
 
