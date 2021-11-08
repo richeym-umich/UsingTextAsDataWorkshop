@@ -44,7 +44,7 @@ c(text_df[text_df$jobno=="N1432775", "text"])
 c(clean_text_df[clean_text_df$jobno=="N1432775", "text"])
 
 #let's save our clean text data file for analysis later on
-write.csv(clean_text_df, file="clean/output/pc-iii-text-clean.csv")
+write.csv(clean_text_df, file="clean/output/pc-iii-text-clean.csv", row.names = FALSE)
 
 # let's plot the number of words over time, out of pure curiosity
 clean_text_df %>% 
@@ -55,5 +55,6 @@ clean_text_df %>%
   labs(x=NULL, y="N(words)") +
   ggtitle("Total number of words per day")
 ggsave("clean/output/bg-total-number-words-day.pdf", height = 4, width = 10)
+dev.off()
 
 #end of Rscript.
