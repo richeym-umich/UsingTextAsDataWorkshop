@@ -25,7 +25,7 @@ df %>%
   filter(n>1040) %>% 
   ggplot(aes(n, word)) +
   geom_col(fill="#2596be") +
-  labs(y=NULL, x = "N(words)") +
+  labs(y=NULL, x = "N(word)") +
   theme_bw(base_size = 20) +
   ggtitle("Ten most common words in UN Documents")
 ggsave("analyze/output/bg-10-most-common-words.pdf", height = 8, width = 12)
@@ -40,11 +40,24 @@ df %>%
   filter(n>325) %>% 
   ggplot(aes(n,bigram)) +
   geom_col(fill="#2596be") +
-  labs(y=NULL, x = "N(bigrams)") +
+  labs(y=NULL, x = "N(bigram)") +
   theme_bw(base_size = 20) +
   ggtitle("Ten most common bigrams in UN Documents")
 ggsave("analyze/output/bg-10-most-common-bigrams.pdf", height = 8, width = 12)
 dev.off()
 
-  
+# let's identify the 10 most common trigrams and plot them
+df %>% 
+  unnest_tokens(trigram, text, token = "ngrams", n = 3) %>% 
+  count(trigram, sort = TRUE) %>% 
+  mutate(trigram = reorder(trigram, n)) %>% 
+  filter(n>134) %>% 
+  ggplot(aes(n,trigram)) +
+  geom_col(fill="#2596be") +
+  labs(y=NULL, x = "N(trigram)") +
+  theme_bw(base_size = 20) +
+  ggtitle("Ten most common trigrams in UN Documents")
+ggsave("analyze/output/bg-10-most-common-trigrams.pdf", height = 8, width = 12)
+dev.off()
 
+#end of Rscript. 

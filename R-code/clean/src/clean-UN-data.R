@@ -32,7 +32,7 @@ clean_text_df <- text_df %>%
   mutate(text = tm::removePunctuation(text)) %>% 
   mutate(text = textstem::lemmatize_strings(text)) %>% 
   mutate(text = tm::removeWords(text, stopwords("english"))) %>% 
-  mutate(text = tm::removeNumbers(text)) %>% 
+  # mutate(text = tm::removeNumbers(text)) %>% 
   mutate(text = tm::stripWhitespace(text)) %>% 
   #let's count the number of words in each text document
   mutate(n_words_doc = stringr::str_count(text, "\\w+"))
