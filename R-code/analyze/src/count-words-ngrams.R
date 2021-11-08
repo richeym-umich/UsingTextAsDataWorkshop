@@ -2,7 +2,7 @@
 # Maintainers: Jule Krüger
 # Copyright:   2021
 #
-# Purpose: Pre-process/clean the UN data to prepare for analysis
+# Purpose: count common words and word combinations (n-grams)
 # ============================================
 
 library(dplyr)
@@ -27,7 +27,7 @@ df %>%
   geom_col(fill="#2596be") +
   labs(y=NULL, x = "N(word)") +
   theme_bw(base_size = 20) +
-  ggtitle("Ten most common words in UN Documents")
+  ggtitle("Ten most common words in select UN Documents")
 ggsave("analyze/output/bg-10-most-common-words.pdf", height = 8, width = 12)
 dev.off()
 
@@ -42,7 +42,7 @@ df %>%
   geom_col(fill="#2596be") +
   labs(y=NULL, x = "N(bigram)") +
   theme_bw(base_size = 20) +
-  ggtitle("Ten most common bigrams in UN Documents")
+  ggtitle("Ten most common bigrams in select UN Documents")
 ggsave("analyze/output/bg-10-most-common-bigrams.pdf", height = 8, width = 12)
 dev.off()
 
@@ -56,7 +56,7 @@ df %>%
   geom_col(fill="#2596be") +
   labs(y=NULL, x = "N(trigram)") +
   theme_bw(base_size = 20) +
-  ggtitle("Ten most common trigrams in UN Documents")
+  ggtitle("Ten most common trigrams in select UN Documents")
 ggsave("analyze/output/bg-10-most-common-trigrams.pdf", height = 8, width = 12)
 dev.off()
 

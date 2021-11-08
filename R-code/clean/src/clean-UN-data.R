@@ -23,7 +23,9 @@ text_df <- tibble(documentDF)
 clean_text_df <- text_df %>% 
   mutate(date = as.Date(date, format="%Y%m%d")) %>% 
   mutate(text = gsub("New York", "", text)) %>% 
-  mutate(text = gsub("United Nations", "", text)) %>% 
+  mutate(text = gsub("United Nations", "UN", text)) %>% 
+  mutate(text = gsub("United States of America", "USA", text)) %>% 
+  mutate(text = gsub("United Kingdom", "UK", text)) %>% 
   #paste hyphenated words together
   mutate(text = gsub("-", "", text)) %>% 
   #expand contractions
