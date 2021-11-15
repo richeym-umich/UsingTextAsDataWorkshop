@@ -19,15 +19,15 @@ df <- tibble(read.csv("clean/output/pc-iii-text-clean.csv", header = TRUE,
 #let's identify the ten most common (individual) words across 71 documents
 #  and plot them
 df %>% 
-  tidytext::unnest_tokens(word, text) %>% 
-  count(word, sort = TRUE) %>% 
-  mutate(word = reorder(word, n)) %>% 
+  tidytext::unnest_tokens(keyword, text) %>% 
+  count(keyword, sort = TRUE) %>% 
+  mutate(keyword = reorder(keyword, n)) %>% 
   filter(n>1040) %>% 
-  ggplot(aes(n, word)) +
+  ggplot(aes(n, keyword)) +
   geom_col(fill="#2596be") +
-  labs(y=NULL, x = "N(word)") +
+  labs(y=NULL, x = "N(keyword)") +
   theme_bw(base_size = 20) +
-  ggtitle("Ten most common words in select UN Documents")
+  ggtitle("Ten most common keywords in select UN Documents")
 ggsave("analyze/output/bg-10-most-common-words.pdf", height = 8, width = 12)
 dev.off()
 
