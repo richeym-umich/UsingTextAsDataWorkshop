@@ -15,6 +15,7 @@
 
 library(dplyr)
 library(tidytext)
+library(tm)
 library(topicmodels)
 library(ggplot2)
 
@@ -22,18 +23,36 @@ setwd("~/git/UsingTextAsDataWorkshop/R-code/")
 df <- tibble(read.csv("clean/output/pc-iii-text-clean.csv", header = TRUE, 
                       stringsAsFactors = FALSE))
 
-#to calculate a topic model, we first need to create a document-term matrix (dtm)
+#to calculate a topic model, we create a document-term matrix (dtm)
+# the matrix counts terms for each document
+
+#there are many different ways to prepare a dtm for topic modeling
+#  you might want to remove terms that do not help distinguish very 
+#  well between topics, such as terms are very rare (which reduces
+#  computation time), as well as terms that occur too often
+#  below, we will drop terms that occur only once, or in more than
+#  half of our documents
 undocs <- df %>% 
   #let's remove numbers first
-  # mutate(text = gsub("nuclear", "", text)) %>% 
-  # mutate(text = gsub("state", "", text)) %>% 
-  # mutate(text = gsub("treaty", "", text)) %>% 
-  # mutate(text = gsub("weapon", "", text)) %>% 
+  mutate(text = tm::removeNumbers(text)) %>% 
+  #drop words of character length 1 or 2
+  mutate(text = gsub('\\b\\w{1,2}\\s','', text)) %>% 
   tidytext::unnest_tokens(word, text) %>%
   count(filename, word) %>%
-  cast_dtm(filename, word, n)
+  group_by(word) %>% 
+  #calculate how many times a word occurs across all documents
+  mutate(total_count = sum(n)) %>%
+  #calculate in how many documents a given word occurs
+  mutate(number_docs = n()) %>% 
+  ungroup() %>%
+  #eliminate terms that occur less than 2 times across all documents
+  filter(total_count > 1) %>%
+  #eliminate terms that occur in more than half the documents
+  filter(number_docs < length(unique(filename))/2) %>% 
+  tidytext::cast_dtm(filename, word, n)
 
 #perform topic modeling, we set a seed to reproduce the same result over and over
+#  we manually choose to model two topics, by setting k=2
 un_lda <- LDA(undocs, k = 2, control=list(seed=4264))
 un_lda
 
@@ -60,4 +79,8 @@ un_top_terms %>%
   ggtitle("Two topic-model for select UN Documents")
 ggsave("analyze/output/bg-LDA-2-topics.pdf", height = 8, width = 12)
 dev.off()
+
+# setting the number of topics manually may not be the best idea
+#  we might want to know which topic model fits the given data best
+
 #end of Rscript.
