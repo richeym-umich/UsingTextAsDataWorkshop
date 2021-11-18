@@ -53,7 +53,7 @@ undocs <- df %>%
 
 #perform topic modeling, we set a seed to reproduce the same result over and over
 #  we manually choose to model two topics, by setting k=2
-un_lda <- LDA(undocs, k = 2, control=list(seed=4264))
+un_lda <- LDA(undocs, k = 3, control=list(seed=4264))
 un_lda
 
 # extract the per-topic-per-word probabilities, called β (“beta”), from the model
@@ -81,6 +81,33 @@ ggsave("analyze/output/bg-LDA-2-topics.pdf", height = 8, width = 12)
 dev.off()
 
 # setting the number of topics manually may not be the best idea
-#  we might want to know which topic model fits the given data best
+#  we might want to know which topic model fits our data best
+#  see this vignette for details:
+#    https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
+library(parallel)
+library(ldatuning)
 
+#this command from the parallel library detects how many cores
+#  are available on your machine for computation
+ncores <- parallel::detectCores()
+
+# depending on the available number of cores on your machine,
+#  the following command may take a while to compute
+#  it is very computationally intensive, especially as you 
+#  increase the possible number of topics to be evaluated
+result <- ldatuning::FindTopicsNumber(
+  undocs,
+  topics = seq(from = 2, to = 75, by = 1),
+  metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
+  method = "Gibbs",
+  control = list(seed = 4264),
+  mc.cores = ncores,
+  verbose = TRUE
+)
+
+# we can plot the results
+pdf("analyze/output/plot-LDA-tuning.pdf", height = 7, width = 12, 
+    onefile=FALSE)
+ldatuning::FindTopicsNumber_plot(result)
+dev.off()
 #end of Rscript.
