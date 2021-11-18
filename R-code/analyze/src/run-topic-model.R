@@ -6,6 +6,13 @@
 #          into two topics, and visualize the results
 # ============================================
 
+
+# resources used for topic modeling:
+# https://www.tidytextmining.com/topicmodeling.html
+# https://towardsdatascience.com/beginners-guide-to-lda-topic-modelling-with-r-e57a5a8e7a25
+# https://towardsdatascience.com/evaluate-topic-model-in-python-latent-dirichlet-allocation-lda-7d57484bb5d0
+# https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
+
 library(dplyr)
 library(tidytext)
 library(topicmodels)
