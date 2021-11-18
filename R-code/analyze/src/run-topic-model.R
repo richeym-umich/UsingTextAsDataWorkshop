@@ -28,9 +28,9 @@ df <- tibble(read.csv("clean/output/pc-iii-text-clean.csv", header = TRUE,
 
 #there are many different ways to prepare a dtm for topic modeling
 #  you might want to remove terms that do not help distinguish very 
-#  well between topics, such as terms are very rare (which reduces
-#  computation time), as well as terms that occur too often
-#  below, we will drop terms that occur only once, or in more than
+#  well between topics, such as terms that are very rare (which reduces
+#  computation time), as well as terms that occur too often.
+#  Below, we will drop terms that occur only once, or in more than
 #  half of our documents
 undocs <- df %>% 
   #let's remove numbers first
@@ -52,8 +52,9 @@ undocs <- df %>%
   tidytext::cast_dtm(filename, word, n)
 
 #perform topic modeling, we set a seed to reproduce the same result over and over
-#  we manually choose to model two topics, by setting k=2
-un_lda <- LDA(undocs, k = 3, control=list(seed=4264))
+#  we manually choose to model n topics, by setting k = n
+ntopics <- 4
+un_lda <- LDA(undocs, k = ntopics, control=list(seed=4264))
 un_lda
 
 # extract the per-topic-per-word probabilities, called β (“beta”), from the model
@@ -76,12 +77,14 @@ un_top_terms %>%
   scale_y_reordered() +
   theme_bw(base_size = 20) +
   labs(y="Term", x="beta (Term-per-topic probability)") +
-  ggtitle("Two topic-model for select UN Documents")
-ggsave("analyze/output/bg-LDA-2-topics.pdf", height = 8, width = 12)
+  ggtitle(paste(ntopics, "topic-model for select UN Documents"))
+outputname <- paste0("analyze/output/bg-LDA-", ntopics, "-topics.pdf")
+ggsave(outputname, height = 8, width = 12)
 dev.off()
 
-# setting the number of topics manually may not be the best idea
-#  we might want to know which topic model fits our data best
+# setting the number of topics (k = n) manually may not be the best idea
+#  we might want to know which topic model fits our data best based on
+#  a select comparison metric of model fit
 #  see this vignette for details:
 #    https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
 library(parallel)
@@ -110,4 +113,8 @@ pdf("analyze/output/plot-LDA-tuning.pdf", height = 7, width = 12,
     onefile=FALSE)
 ldatuning::FindTopicsNumber_plot(result)
 dev.off()
+
+#based on the results, we would conclude that 
+#  22-33 topics would model these documents best
+
 #end of Rscript.
