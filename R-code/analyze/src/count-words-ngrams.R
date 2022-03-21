@@ -34,7 +34,7 @@ dev.off()
 #next, let's identify which two words are common to appear together (bigrams),
 # and plot them, too
 df %>% 
-  unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
+  tidytext::unnest_tokens(bigram, text, token = "ngrams", n = 2) %>% 
   count(bigram, sort = TRUE) %>% 
   mutate(bigram = reorder(bigram, n)) %>% 
   filter(n>325) %>% 
@@ -48,7 +48,7 @@ dev.off()
 
 # let's identify the 10 most common trigrams and plot them
 df %>% 
-  unnest_tokens(trigram, text, token = "ngrams", n = 3) %>% 
+  tidytext::unnest_tokens(trigram, text, token = "ngrams", n = 3) %>% 
   count(trigram, sort = TRUE) %>% 
   mutate(trigram = reorder(trigram, n)) %>% 
   filter(n>134) %>% 
