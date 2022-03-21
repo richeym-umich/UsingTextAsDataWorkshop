@@ -21,7 +21,7 @@ head(xml_filepaths)
 print(paste("We are dealing with a total of", length(xml_filepaths), "xml data files."))
 
 #the data are organized by year
-#how many data files are there for each year?
+# QU: how many data files are there for each year?
 # each path starts with the relevant year, 
 # e.g., "^1990/" using regular expressions
 years <- data.frame(year=c(1990:2014), number_files=NA)
@@ -42,7 +42,9 @@ dev.off()
 library("xml2")
 library("methods")
 
-#we create a function that parses each xml file into one data row,
+# GOAL: create a dataframe where each row represents one document,
+#       and each column contains specific info about that document
+# we create a function that parses each xml file into one data row,
 # we collect some metadata for each document, and the document's text
 parseUNDocumentFromXML <- function(iter, file_path, row_container) {
   
@@ -76,7 +78,7 @@ parseUNDocumentFromXML <- function(iter, file_path, row_container) {
                               stringsAsFactors = FALSE), 
                    c("text"))
 
-  #bind all values together in one rown
+  #bind all values together in one row
   new_df_row <- cbind(filename, pubPlace, date, symbol, jobno, text)
   
   row_container[[iter]] <- new_df_row
@@ -110,6 +112,7 @@ processSaveYearData <- function(year, subdir_name = NULL) {
   # warning, this step can take a while if run for an entire year
   # as most years contain thousands of xml files, i.e., if subdir_name=NULL
   for (i in grep(file_selection, xml_filepaths)) {
+    #print(i)
     row_container <- parseUNDocumentFromXML(i, xml_filepaths[i], row_container)
   }
   documentDF <- do.call(rbind, row_container)
