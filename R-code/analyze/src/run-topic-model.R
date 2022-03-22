@@ -114,7 +114,11 @@ pdf("analyze/output/plot-LDA-tuning.pdf", height = 7, width = 12,
 ldatuning::FindTopicsNumber_plot(result)
 dev.off()
 
-#based on the results, we would conclude that 
-#  22-33 topics would model these documents best
+# using the vignette for the ldatuning package
+# https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
+#  based on our results, we would conclude that 
+#  somewhere around 20-30 some topics would model these documents best
+#  (Griffiths2004 high, CaoJuan2009 and Arun 2010 low)
+#  (Deveaud2014 metric does not seem informative here)
 
 #end of Rscript.
