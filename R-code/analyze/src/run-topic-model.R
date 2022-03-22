@@ -23,7 +23,7 @@ setwd("~/git/UsingTextAsDataWorkshop/R-code/")
 df <- tibble(read.csv("clean/output/pc-iii-text-clean.csv", header = TRUE, 
                       stringsAsFactors = FALSE))
 
-#to calculate a topic model, we create a DOCUMENT-TERM MATRIX (dtm)
+#to calculate a topic model, we need to create a DOCUMENT-TERM MATRIX (dtm)
 # the DTM counts terms for each document
 # the dtm is a mathematical matrix that describes the frequency with which 
 #  termsoccur across our 71 UN documents. 
@@ -50,11 +50,35 @@ undocs <- df %>%
   #calculate in how many documents a given word occurs
   mutate(number_docs = n()) %>% 
   ungroup() %>%
-  #eliminate terms that occur less than 2 times across all documents
+  #before we create our DTM, we are going to drop certain terms that
+  #  do not seem insightful when determining topics
+  # we eliminate terms that occur less than 2 times across all documents
   filter(total_count > 1) %>%
-  #eliminate terms that occur in more than half the documents
+  # and we eliminate terms that occur in more than half the documents
   filter(number_docs < length(unique(filename))/2) %>% 
+  
+  # now we are ready to cast our tidy data into a DTM,
+  #  because the LDA function in the topicmodels library expects 
+  #   an object of class "DocumentTermMatrix"
+  #  to create the DTM, we are using information on 
+  #   the filename (aka the document where a term was found), 
+  #   the 'word' column that contains the "terms" we decided to keep, 
+  #   and the number of times the term occured in a select document
   tidytext::cast_dtm(filename, word, n)
+
+# before we continue, let's check out our DTM a bit:
+#  it has 71 rows, which is equal to the number of documents
+#  and 3100 columns, which is the number of terms we are working with
+#  the dtm tracks how many times each term occurred in a select document
+nrow(undocs)
+ncol(undocs)
+# the "Docs" dimension refers to our filenames 
+undocs$dimnames$Docs[1:10]
+# the "Terms" dimension identifies the various keywords we are working with
+undocs$dimnames$Terms[1:10]
+# this is what the first 
+inspect(undocs[1:5, 1:5])
+
 
 #perform topic modeling, we set a seed to reproduce the same result over and over
 #  we manually choose to model n topics, by setting k = n
