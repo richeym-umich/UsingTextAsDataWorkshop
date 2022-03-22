@@ -1,6 +1,6 @@
 # Authors:     Jule Krüger
 # Maintainers: Jule Krüger
-# Copyright:   2021
+# Copyright:   ARC 2022
 #
 # Purpose: perform an unsupervised classification of UN documents
 #          into two topics, and visualize the results
@@ -23,11 +23,16 @@ setwd("~/git/UsingTextAsDataWorkshop/R-code/")
 df <- tibble(read.csv("clean/output/pc-iii-text-clean.csv", header = TRUE, 
                       stringsAsFactors = FALSE))
 
-#to calculate a topic model, we create a document-term matrix (dtm)
-# the matrix counts terms for each document
+#to calculate a topic model, we create a DOCUMENT-TERM MATRIX (dtm)
+# the DTM counts terms for each document
+# the dtm is a mathematical matrix that describes the frequency with which 
+#  termsoccur across our 71 UN documents. 
+#  in this matrix, each rows corresponds to one document in our collection
+#  each column corresponds to one term, giving the number of times
+#  that term appeared in the document
 
 #there are many different ways to prepare a dtm for topic modeling
-#  you might want to remove terms that do not help distinguish very 
+#  here, we want to remove terms that do not help distinguish very 
 #  well between topics, such as terms that are very rare (which reduces
 #  computation time), as well as terms that occur too often.
 #  Below, we will drop terms that occur only once, or in more than
@@ -53,7 +58,7 @@ undocs <- df %>%
 
 #perform topic modeling, we set a seed to reproduce the same result over and over
 #  we manually choose to model n topics, by setting k = n
-ntopics <- 4
+ntopics <- 2
 un_lda <- LDA(undocs, k = ntopics, control=list(seed=4264))
 un_lda
 

@@ -1,6 +1,6 @@
 # Authors:     Jule Krüger
-# Maintainers: Jule Krüger, Meghan Dailey
-# Copyright:   2021
+# Maintainers: Jule Krüger
+# Copyright:   ARC 2022
 #
 # Purpose: get a better understanding of the UN Corpus, 
 #          the file structure, xml data, and read part or all 

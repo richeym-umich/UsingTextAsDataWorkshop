@@ -1,6 +1,6 @@
 # Authors:     Jule Krüger
 # Maintainers: Jule Krüger
-# Copyright:   2021
+# Copyright:   ARC 2022
 #
 # Purpose: count common words and word combinations (n-grams)
 # ============================================
