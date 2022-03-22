@@ -109,7 +109,7 @@ result <- ldatuning::FindTopicsNumber(
 )
 
 # we can plot the results
-pdf("analyze/output/plot-LDA-tuning.pdf", height = 7, width = 12, 
+pdf("analyze/output/plot-LDA-tuning.pdf", height = 7, width = 14, 
     onefile=FALSE)
 ldatuning::FindTopicsNumber_plot(result)
 dev.off()
