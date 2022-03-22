@@ -118,7 +118,8 @@ dev.off()
 # https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
 #  based on our results, we would conclude that 
 #  somewhere around 20-30 some topics would model these documents best
-#  (Griffiths2004 high, CaoJuan2009 and Arun 2010 low)
+#  (Griffiths2004 high/looking for the max, 
+#   CaoJuan2009 and Arun 2010 low/looking for the minimum)
 #  (Deveaud2014 metric does not seem informative here)
 
 #end of Rscript.
